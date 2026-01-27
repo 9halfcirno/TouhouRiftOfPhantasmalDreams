@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<script src="libs/eruda.js"></script>
+	<script>
+		if (navigator.platform !== "Win32") eruda.init();
+	</script>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>☯️東方幻夢鄉 ~Touhou Rift of Phantasmal Dreams~</title>
+	<style>
+		body,
+		html {
+			padding: 0;
+			margin: 0;
+			/*display: flex;*/
+		}
+
+		canvas {
+			margin: auto;
+		}
+	</style>
+	<script type="module">
+		import * as THREE from "./libs/three.module.js";
+		globalThis.THREE = THREE;
+	</script>
+</head>
+
+<body onselectstart='return false'>
+	<script type="module" src="./code/index.js"></script>
+	<!-- <button onclick="location.reload()">[refresh]</button> -->
+	<div id="game"></div>
+	<div id="debug" style="position: fixed;bottom: 0;background-color: white;"></div>
+	<script>
+		function createVirtualKeyboard() {
+		    // 创建键盘容器
+		    const keyboard = document.createElement('div');
+		    keyboard.style.position = 'fixed';
+		    keyboard.style.bottom = '0';
+		    keyboard.style.left = '0';
+		    keyboard.style.width = '100%';
+		    keyboard.style.backgroundColor = '#333';
+		    keyboard.style.padding = '10px 0';
+		    keyboard.style.boxSizing = 'border-box';
+		    keyboard.style.zIndex = '1000';
+		    keyboard.style.display = 'flex';
+		    keyboard.style.flexDirection = 'column';
+		    keyboard.style.alignItems = 'center';
+		    keyboard.style.userSelect = 'none';
+		    keyboard.style.touchAction = 'none';
+		    keyboard.id = 'virtual-keyboard';
+		
+		    // 创建按键行容器
+		    const row1 = document.createElement('div');
+		    row1.style.display = 'flex';
+		    row1.style.justifyContent = 'center';
+		    row1.style.marginBottom = '10px';
+		
+		    const row2 = document.createElement('div');
+		    row2.style.display = 'flex';
+		    row2.style.justifyContent = 'center';
+		    row2.style.width = '100%';
+		
+		    // 创建方向键
+		    const directions = {
+		        'w': '↑',
+		        'a': '←',
+		        's': '↓',
+		        'd': '→'
+		    };
+		
+		    const dirContainer = document.createElement('div');
+		    dirContainer.style.display = 'grid';
+		    dirContainer.style.gridTemplateColumns = 'repeat(3, 1fr)';
+		    dirContainer.style.gridTemplateRows = 'repeat(2, 1fr)';
+		    dirContainer.style.gap = '5px';
+		    dirContainer.style.marginRight = '20px';
+		
+		    // 空单元格
+		    const empty = document.createElement('div');
+		    empty.style.gridColumn = '2';
+		    empty.style.gridRow = '1';
+		
+		    // 方向键按键
+		    for (const [key, label] of Object.entries(directions)) {
+		        const btn = createKeyButton(label, key);
+		        switch(key) {
+		            case 'w': btn.style.gridArea = '1 / 2'; break;
+		            case 'a': btn.style.gridArea = '2 / 1'; break;
+		            case 's': btn.style.gridArea = '2 / 2'; break;
+		            case 'd': btn.style.gridArea = '2 / 3'; break;
+		        }
+		        dirContainer.appendChild(btn);
+		    }
+		
+		    // 创建功能键
+		    const keys = [
+		        { label: 'Z', code: 'z' },
+		        { label: 'X', code: 'x' },
+		        { label: 'shift', code: 'Shift' },
+		        { label: 'space', code: ' ' },
+		        //{ label: 'A', code: 'a' },
+		        { label: 'Enter', code: 'Enter' },
+		        { label: 'ESC', code: 'Escape' }
+		    ];
+		
+		    const funcContainer = document.createElement('div');
+		    funcContainer.style.display = 'flex';
+		    funcContainer.style.flexWrap = 'wrap';
+		    funcContainer.style.gap = '10px';
+		    funcContainer.style.maxWidth = '200px';
+		
+		    keys.forEach(keyInfo => {
+		        const btn = createKeyButton(keyInfo.label, keyInfo.code);
+		        btn.style.flex = '1 0 40%';
+		        funcContainer.appendChild(btn);
+		    });
+		
+		    // 组装键盘
+		    row1.appendChild(dirContainer);
+		    row2.appendChild(funcContainer);
+		    keyboard.appendChild(row1);
+		    keyboard.appendChild(row2);
+		
+		    // 添加到文档
+		    document.body.appendChild(keyboard);
+		
+		    // 创建按键元素的辅助函数
+		    function createKeyButton(label, keyCode) {
+		        const btn = document.createElement('div');
+		        btn.textContent = label;
+		        btn.style.padding = '12px 0';
+		        btn.style.minWidth = '50px';
+		        btn.style.backgroundColor = '#555';
+		        btn.style.color = 'white';
+		        btn.style.textAlign = 'center';
+		        btn.style.borderRadius = '5px';
+		        btn.style.fontSize = '18px';
+		        btn.style.cursor = 'pointer';
+		        btn.style.boxShadow = '0 3px 0 #222';
+		        
+		        // 添加事件监听
+		        btn.addEventListener('mousedown', handlePress);
+		        btn.addEventListener('touchstart', handlePress, { passive: false });
+		        btn.addEventListener('mouseup', handleRelease);
+		        btn.addEventListener('touchend', handleRelease);
+		        btn.addEventListener('mouseleave', handleRelease);
+		        
+		        //let pressing = [];
+		        
+		        function handlePress(e) {
+		            e.preventDefault();
+		            btn.style.transform = 'translateY(3px)';
+		            btn.style.boxShadow = 'none';
+		            btn.style.backgroundColor = '#777';
+		            
+		            // 创建并触发键盘事件
+		            //if (!pressing.includes(keyCode)) pressing.push(keyCode);
+		            const keyEvent = new KeyboardEvent('keydown', {
+		                key: keyCode,
+		                code: keyCode,
+		                bubbles: true,
+		                //repeat: pressing.includes(keyCode) ? true : false
+		            });
+		            document.dispatchEvent(keyEvent);
+		        }
+		        
+		        function handleRelease() {
+		            btn.style.transform = '';
+		            btn.style.boxShadow = '0 3px 0 #222';
+		            btn.style.backgroundColor = '#555';
+		            
+		            //pressing.splice(pressing.indexOf(keyCode), 1)
+		            
+		            const keyEvent = new KeyboardEvent('keyup', {
+		                key: keyCode,
+		                code: keyCode,
+		                bubbles: true
+		            });
+		            document.dispatchEvent(keyEvent);
+		        }
+		        
+		        return btn;
+		    }
+		}
+		
+		// 使用示例：调用函数创建虚拟键盘
+		if (navigator.platform !== "Win32") createVirtualKeyboard();
+	</script>
+</body>
+
+</html>
