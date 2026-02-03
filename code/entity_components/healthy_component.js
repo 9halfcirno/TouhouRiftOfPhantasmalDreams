@@ -3,8 +3,13 @@ import { Component } from "./component.js";
 class HealthyComponent extends Component {
     constructor(data) {
         super("th:hp", data);
-        this.maxHp = data.maxHp || Infinity;
-        this.hp = data.hp || data.maxHp;
+        if (typeof data === "object") {this.maxHp = data.maxHp || Infinity;
+            this.hp = data.hp || data.maxHp;
+        } else {
+            this.hp = data;
+            this.maxHp = Infinity;
+        }
+        
     }
 
     get value() {

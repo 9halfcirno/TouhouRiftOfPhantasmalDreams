@@ -15,7 +15,8 @@ class Component {
     static createComponent(type, data) {
         const ComponentClass = this.components.get(type);
         if (!ComponentClass) {
-            throw new Error(`未注册的组件类型: ${type}`);
+            // console.warn(`未注册的组件类型: ${type}`);
+            return data;
         }
         return new ComponentClass(data);
     }
