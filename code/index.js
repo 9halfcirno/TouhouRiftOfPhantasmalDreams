@@ -80,8 +80,8 @@ scene.addGameMap(debug.main)
 scene.switchToGameMap("th:map=main")
 
 await TH.TextureManager.load("th:texture=entity/reimu")
-await TH.TextureManager.load("th:texture=a")
-await TH.Entity.registerEntity("th:entity=bullet/ball");
+//await TH.TextureManager.load("th:texture=a")
+//await TH.Entity.registerEntity("th:entity=bullet/ball");
 await TH.Entity.registerEntity("th:entity=character/reimu");
 await TH.TextureManager.load("th:texture=entity/fairy")
 await TH.Entity.registerEntity("th:entity=enemy/fairy");
@@ -100,7 +100,7 @@ TH.system.startTick()
 
 TH.KeyboardInput.onKey("x", () => {
 	 for (let i = 0; i < 100; i++) {
-	let e = new TH.Entity("th:entity=bullet/ball", {
+	let e = new TH.Entity("th:entity=enemy/fairy", {
 		position: entity.position
 	});
 	debug.main.addObject(e);
