@@ -10,19 +10,20 @@ class HealthySystem extends System {
         });
     }
 
-    updateEntity(entity, hp) {
-        if (hp <= 0) {
-            entity.die();
-        }
-    }
-
     update() {
         const entities = Entity.getAllEntities();
-        for (const entity of entities) {
-            const hpComponent = entity.getComponent("th:hp");
-            if (!hpComponent) continue;
-            const hp = hpComponent.value || 0;
-            this.updateEntity(entity, hp);
+        for (const entity of entities) { // 检查生命值
+            if (entity.hasComponent("th:hp")) {
+                const hpComponent = entity.getComponent("th:hp");
+                const hp = hpComponent.value || 0;
+                if (hp <= 0) entity.die();
+            }
+
+            // 检查最大存活时间
+            if (entity.hasComponent("th:max_life_time")) {
+                const time = entity.getComponent("th:max_life_time").value;
+                if (THSystem.frame - entity.summonTime > time) entity.die();
+            }
         }
     }
 }
