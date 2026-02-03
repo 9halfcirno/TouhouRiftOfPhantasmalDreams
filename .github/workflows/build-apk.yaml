@@ -1,0 +1,76 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        
+    - name: Setup Java
+      # 建议同时升级到v4，避免将来出现类似问题
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '11'
+        
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      
+    - name: Install Cordova
+      run: |
+        npm install -g cordova
+        cordova --version
+        
+    - name: Create Cordova project
+      run: |
+        cordova create android-app com.example.myapp "MyApp"
+        cd android-app
+        cordova platform add android@latest
+        
+    - name: Copy project files
+      run: |
+        mkdir -p android-app/www
+        # 复制项目文件，排除不需要的目录
+        rsync -av --exclude='.git/' --exclude='.github/' --exclude='android-app/' --exclude='node_modules/' ./ android-app/www/
+        
+        # 确保入口文件是 index.html (Cordova默认加载 index.html)
+        if [ -f "android-app/www/main.html" ]; then
+          echo "将 main.html 设置为入口点..."
+          # 可以根据需要选择是复制一份，还是重命名
+          cp android-app/www/main.html android-app/www/index.html
+        fi
+        
+    - name: Configure Cordova
+      run: |
+        cd android-app
+        echo "Configuring Android build..."
+        
+    - name: Build Android APK
+      run: |
+        cd android-app
+        cordova build android --release
+        
+    - name: Upload APK artifact
+      # 关键修改：此处已更新为 v4
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-apk
+        path: android-app/platforms/android/app/build/outputs/apk/release/*.apk
+        # v4 新增参数，可选：如果没有找到文件，则报错失败
+        if-no-files-found: error
+        # v4 新增参数，可选：覆盖同名产物
+        overwrite: true
