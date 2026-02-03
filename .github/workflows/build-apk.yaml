@@ -73,7 +73,8 @@ jobs:
         # v4 新增参数，可选：如果没有找到文件，则报错失败
         if-no-files-found: error
         # v4 新增参数，可选：覆盖同名产物
-        overwrite: true    - name: Configure Capacitor
+        overwrite: true    
+    - name: Configure Capacitor
       run: |
         npx cap init MyApp com.example.myapp
         npx cap add android
