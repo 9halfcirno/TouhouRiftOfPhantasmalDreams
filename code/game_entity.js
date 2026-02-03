@@ -37,7 +37,8 @@ class Entity extends GameObject {
 		this.thid = thid;
 
 		this.isAlive = true;
-		
+		this.summonTime = THSystem.frame;
+
 		Entity._entityPool.set(this.uuid, this);
 
 		this.components = new Map(); // atts => 属性
@@ -82,11 +83,11 @@ class Entity extends GameObject {
 		let speed = this.components.get("th:speed");
 		if (!speed) return;
 		this.moveBy(Math.cos(dir.x) * speed.value, speed.value * Math.sin(dir.y), Math.sin(dir.x) * speed.value);
-
+		return this;
 	}
 
 	die(opts) {
-		this.setComponentValue("th:hp", 0);
+		// this.setComponentValue("th:hp", 0);
 		this.isAlive = false;
 		Entity.removeEntity(this.uuid);
 		this._disposeThree();
@@ -99,6 +100,10 @@ class Entity extends GameObject {
 	setComponent(type, com) {
 		let component = Component.createComponent(type, com);
 		this.components.set(type, component);
+	}
+
+	hasComponent(type) {
+		return this.components.has(type);
 	}
 
 	getComponentValue(type) {
@@ -125,7 +130,7 @@ class Entity extends GameObject {
 		for (let [type, data] of Object.entries(def.components)) {
 			this.setComponent(type, data);
 		}
-		
+
 	}
 
 	static async registerEntity(thid) {
@@ -144,11 +149,11 @@ class Entity extends GameObject {
 		url += ".js";
 		return url;
 	}
-	
+
 	static getEntity(uuid) {
 		return this._entityPool.get(uuid);
 	}
-	
+
 	static removeEntity(uuid) {
 		return this._entityPool.delete(uuid);
 	}
@@ -165,6 +170,4 @@ Entity._entityPool = new Map();
 Entity.entityDefinitions.set("th:entity=null", {});
 
 
-export {
-	Entity
-}
+export { Entity }

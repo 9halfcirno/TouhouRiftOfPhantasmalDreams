@@ -5,7 +5,7 @@ let con = {
 	
 	"game_tick_interval": 1000 / 20,
 	
-	"camera_distance": 16,
+	"camera_distance": 10,
 	"camera_follow_speed": 1.5,
 }
 

@@ -33,7 +33,7 @@ class GameScene {
 		this.three.renderer.setSize(args.width, args.height);
 		this.three.renderer.setClearColor(0x000000);
 		this.three.renderer.setPixelRatio(window.devicePixelRatio);
-		this.three.renderer.shadowMap.enabled = true;
+		//this.three.renderer.shadowMap.enabled = true;
 
 		this.domElement = this.three.renderer.domElement;
 
@@ -132,17 +132,28 @@ class GameScene {
 			// this.useCamera.position.copy(orPos)
 		})
 		window.addEventListener('resize', () => {
-			GAME_CONFIG.WIDTH = Math.min(window.innerWidth);
-			GAME_CONFIG.HEIGHT = Math.min(window.innerWidth * (9 / 16), window.innerHeight);
+			const maxWidth = window.innerWidth;
+			const maxHeight = window.innerHeight;
+			const windowAspect = maxWidth / maxHeight;
+
+			if (windowAspect > GAME_CONFIG.STAGE_ASPECT) {
+				GAME_CONFIG.STAGE_HEIGHT = maxHeight;
+				GAME_CONFIG.STAGE_WIDTH = maxHeight * GAME_CONFIG.STAGE_ASPECT;
+			} else {
+				GAME_CONFIG.STAGE_WIDTH = maxWidth;
+				GAME_CONFIG.STAGE_HEIGHT = maxWidth / GAME_CONFIG.STAGE_ASPECT;
+			}
+
 			this.refreshThreeArgs({
-				width: GAME_CONFIG.WIDTH,
-				height: GAME_CONFIG.HEIGHT
+				aspect: GAME_CONFIG.STAGE_ASPECT,
+				width: GAME_CONFIG.STAGE_WIDTH,
+				height: GAME_CONFIG.STAGE_HEIGHT
 			})
 		});
 	}
 
 	refreshThreeArgs(args = {}) {
-		this.three.camera.aspect = args.width / args.height;
+		this.three.camera.aspect = args.aspect || args.width / args.height;
 		this.three.camera.updateProjectionMatrix();
 		this.three.renderer.setSize(args.width, args.height);
 	}

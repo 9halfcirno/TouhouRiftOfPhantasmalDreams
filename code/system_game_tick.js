@@ -81,4 +81,6 @@ const system = {
 	},
 };
 
+globalThis.THSystem = system;
+
 export { system };

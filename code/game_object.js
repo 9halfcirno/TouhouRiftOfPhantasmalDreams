@@ -46,6 +46,8 @@ class GameObject {
 		this.three.mesh.receiveShadow = true;
 		this.inMap = null;                                            
 		// GameObject.objectsMap.set(this.uuid, this); // 把自己扔对象池
+
+		this.texture = this.three.material.map; // 保存引用		
 	}
 	/**
 	 * 设置GmaeObject的游戏坐标，并自动处理THREE坐标
